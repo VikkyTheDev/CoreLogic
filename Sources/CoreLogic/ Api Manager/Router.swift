@@ -11,14 +11,18 @@ import UIKit
 public enum Router {
     public typealias Params = [String: Any]
     case authenticate(params: Params)
+    case addressSuggestion(params: Params)
     case matchAddress(params: Params)
     case corePropertyAttributes(propertyId: Int)
+    case additionalPropertyAttributes(propertyId: Int)
     case propertylocation(propertyId: Int)
     case places(localityId: Int)
     case schoolDetail(placeId: Int)
+    case propertyInsight(propertyId: Int)
+    case propertyInsightDetail(propertyId: Int)
+    case census(params: [String:[[String:Any]]])
 
 }
-
 extension Router:  Alamofire.URLRequestConvertible {
     
     public func asURLRequest () throws -> URLRequest {
@@ -26,7 +30,7 @@ extension Router:  Alamofire.URLRequestConvertible {
         var baseURL: URL {
             switch self {
             case .authenticate:
-                return URL(string: "https://api-uat.corelogic.asia/access/oauth")!//"https://access-api.corelogic.asia/access/oauth")!
+                return URL(string: "https://api-uat.corelogic.asia/access/oauth")!
             default:
                 return URL(string: "https://api-uat.corelogic.asia")!
             }
@@ -60,6 +64,8 @@ extension Router {
         switch self {
         case .authenticate(let params):
             return ("/token", params, .get)
+        case .addressSuggestion(let params):
+            return ("/property/au/v2/suggest.json", params, .get)
         case .matchAddress(let params):
             return ("search/au/matcher/address", params, .get)
         case .corePropertyAttributes(let propertyId):
@@ -70,6 +76,14 @@ extension Router {
             return ("places/search/locality/\(localityId)", nil, .get)
         case .schoolDetail(let placeId):
               return ("places/\(placeId)", nil, .get)
+        case .additionalPropertyAttributes(let propertyId):
+            return ("property-details/au/properties/\(propertyId)/attributes/additional", nil, .get)
+        case .propertyInsight(propertyId: let propertyId):
+            return ("/property-details/au/properties/\(propertyId)/otm/campaign/sales", nil, .get)
+        case .propertyInsightDetail(propertyId: let propertyId):
+            return ("/property-details/au/properties/\(propertyId)/sales/last", nil, .get)
+        case .census(let params):
+            return ("/statistics/census", params, .post)
         }
     }
 }
